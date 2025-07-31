@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SecureChat Pro - End-to-End Encrypted Messaging</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+    line-height: 1.6;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+    color: white;
+  }
+
+  .header h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  }
+
+  .header p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+  }
+
+  .card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    transition: all 0.3s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+  }
+
+  .card h2 {
+    color: #4c51bf;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 30px;
+  }
+
+  .btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    min-width: 200px;
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+  }
+
+  .btn:active {
+    transform: translateY(0);
+  }
+
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .btn-danger {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+  }
+
+  .btn-success {
+    background: linear-gradient(135deg, #51cf66, #40c057);
+  }
+
+  .input-group {
+    margin-bottom: 20px;
+  }
+
+  .input-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #4a5568;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    background: rgba(255,255,255,0.8);
+  }
+
+  .form-control:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    background: white;
+  }
+
+  .textarea {
+    min-height: 100px;
+    resize: vertical;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  }
+
+  .login-container {
+    max-width: 400px;
+    margin: 100px auto;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .status-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+  }
+
+  .status-success { background: #51cf66; }
+  .status-warning { background: #ffd43b; }
+  .status-error { background: #ff6b6b; }
+
+  .key-display {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 12px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    word-break: break-all;
+  }
+
+  .progress-bar {
+    width: 100%;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 20px 0;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+  }
+
+  .message-bubble {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 20px;
+    margin: 10px 0;
+    max-width: 80%;
+    position: relative;
+  }
+
+  .message-bubble.received {
+    background: #f1f3f4;
+    color: #333;
+    margin-left: auto;
+  }
+
+  .notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    z-index: 1000;
+    transform: translateX(400px);
+    transition: transform 0.3s ease;
+  }
+
+  .notification.show {
+    transform: translateX(0);
+  }
+
+  .notification.success { background: #51cf66; }
+  .notification.error { background: #ff6b6b; }
+  .notification.info { background: #339af0; }
+
+  .tabs {
+    display: flex;
+    margin-bottom: 30px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 5px;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 15px;
+    text-align: center;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: white;
+    font-weight: 600;
+  }
+
+  .tab.active {
+    background: white;
+    color: #667eea;
+  }
+
+  .tab-content {
+    display: none;
+  }
+
+  .tab-content.active {
+    display: block;
+  }
+
+  @media (max-width: 768px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+
+    .header h1 {
+      font-size: 2rem;
+    }
+
+    .card {
+      padding: 20px;
+    }
+
+    .container {
+      padding: 10px;
+    }
+  }
+
+  .loading-spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .file-drop-zone {
+    border: 2px dashed #667eea;
+    border-radius: 12px;
+    padding: 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(102, 126, 234, 0.05);
+  }
+
+  .file-drop-zone:hover {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: #5a67d8;
+  }
+
+  .icon {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+  }
+</style>
+</head>
+<body>
+
+<div id="loginSection" class="login-container">
+  <div class="card">
+    <div class="header">
+      <h1>🔐 SecureChat Pro</h1>
+      <p>End-to-End Encrypted Messaging</p>
+    </div>
+
+    <div class="input-group">
+      <label for="passwordInput">🔑 Enter Password</label>
+      <input type="password" id="passwordInput" class="form-control" placeholder="Enter your secure password" />
+    </div>
+
+    <button id="loginBtn" class="btn" style="width: 100%;">
+      Login Securely
+    </button>
+
+    <div style="margin-top: 20px; text-align: center; font-size: 14px; color: #666;">
+      Default password: <code>jaydip@123</code>
+    </div>
+  </div>
+</div>
+
+<div id="appSection" class="hidden">
+  <div class="container">
+    <div class="header">
+      <h1>🔐 SecureChat Pro</h1>
+      <p>Your messages are protected with military-grade encryption</p>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="keys">🔑 Key Management</div>
+      <div class="tab" data-tab="encrypt">🔒 Encrypt</div>
+      <div class="tab" data-tab="decrypt">🔓 Decrypt</div>
+      <div class="tab" data-tab="messages">💬 Messages</div>
+    </div>
+
+    <div id="keysTab" class="tab-content active">
+      <div class="card">
+        <h2>
+          <span class="status-indicator status-warning"></span>
+          RSA Key Pair Generation
+        </h2>
+
+        <div class="input-group">
+          <button id="generateKeysBtn" class="btn">
+            🎲 Generate New Key Pair (2048-bit RSA)
+          </button>
+        </div>
+
+        <div class="input-group">
+          <label>📤 Your Public Key (Share this with others)</label>
+          <textarea id="publicKeyDisplay" class="form-control textarea key-display" readonly placeholder="Your public key will appear here..."></textarea>
+          <button id="copyPublicBtn" class="btn btn-success" style="margin-top: 10px;" disabled>
+            📋 Copy Public Key
+          </button>
+        </div>
+
+        <div class="input-group">
+          <label>🔐 Your Private Key (Keep this SECRET!)</label>
+          <textarea id="privateKeyDisplay" class="form-control textarea key-display" readonly placeholder="Your private key will appear here..."></textarea>
+          <button id="downloadPrivateBtn" class="btn" style="margin-top: 10px;" disabled>
+            💾 Download Private Key
+          </button>
+          <button id="savePrivateBtn" class="btn btn-success" style="margin-top: 10px;" disabled>
+            🗃️ Save Private Key to DB
+          </button>
+        </div>
+
+        <div class="input-group">
+          <label>📂 Import Private Key</label>
+          <div class="file-drop-zone" id="keyDropZone">
+            <p>🔑 Drop your private key file here or click to browse</p>
+            <input type="file" id="keyFileInput" accept=".txt,.pem,.key" style="display: none;">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="encryptTab" class="tab-content">
+      <div class="card">
+        <h2>
+          <span class="status-indicator status-success"></span>
+          Message Encryption
+        </h2>
+
+        <div class="input-group">
+          <label>👤 Recipient's Public Key</label>
+          <textarea id="recipientPublicKey" class="form-control textarea key-display" placeholder="Paste the recipient's public key here..."></textarea>
+        </div>
+
+        <div class="input-group">
+          <label>✍️ Message to Encrypt</label>
+          <textarea id="plainText" class="form-control textarea" placeholder="Type your secret message here..."></textarea>
+          <div style="text-align: right; font-size: 12px; color: #666; margin-top: 5px;">
+            <span id="charCount">0</span> characters
+          </div>
+        </div>
+
+        <div class="input-group">
+          <button id="encryptBtn" class="btn" disabled>
+            🔒 Encrypt Message
+          </button>
+        </div>
+
+        <div class="progress-bar hidden" id="encryptProgress">
+          <div class="progress-fill" style="width: 0%"></div>
+        </div>
+
+        <div id="encryptionResults" class="hidden">
+          <div class="input-group">
+            <label>🔐 Encrypted Message</label>
+            <textarea id="encryptedMessage" class="form-control textarea key-display" readonly></textarea>
+          </div>
+
+          <div class="input-group">
+            <label>🔑 Encrypted AES Key</label>
+            <textarea id="encryptedAESKey" class="form-control textarea key-display" readonly></textarea>
+          </div>
+
+          <div class="input-group">
+            <label>🎲 Initialization Vector (IV)</label>
+            <textarea id="iv" class="form-control key-display" readonly></textarea>
+          </div>
+
+          <button id="copyEncryptedBtn" class="btn btn-success">
+            📋 Copy All Encrypted Data
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="decryptTab" class="tab-content">
+      <div class="card">
+        <h2>
+          <span class="status-indicator status-error"></span>
+          Message Decryption
+        </h2>
+
+        <div class="input-group">
+          <label>🔐 Your Private Key</label>
+          <textarea id="yourPrivateKey" class="form-control textarea key-display" placeholder="Paste your private key here or it will be loaded from DB..."></textarea>
+        </div>
+
+        <div class="input-group">
+          <label>🔒 Encrypted Message</label>
+          <textarea id="encMessageForDecryption" class="form-control textarea key-display" placeholder="Paste the encrypted message here..."></textarea>
+        </div>
+
+        <div class="input-group">
+          <label>🔑 Encrypted AES Key</label>
+          <textarea id="encAESKeyForDecryption" class="form-control textarea key-display" placeholder="Paste the encrypted AES key here..."></textarea>
+        </div>
+
+        <div class="input-group">
+          <label>🎲 Initialization Vector (IV)</label>
+          <textarea id="ivForDecryption" class="form-control key-display" placeholder="Paste the IV here..."></textarea>
+        </div>
+
+        <div class="input-group">
+          <button id="decryptBtn" class="btn btn-danger" disabled>
+            🔓 Decrypt Message
+          </button>
+        </div>
+
+        <div class="progress-bar hidden" id="decryptProgress">
+          <div class="progress-fill" style="width: 0%"></div>
+        </div>
+
+        <div id="decryptionResults" class="hidden">
+          <div class="input-group">
+            <label>✅ Decrypted Message</label>
+            <textarea id="decryptedMessage" class="form-control textarea" readonly style="background: #f0fff4; border-color: #51cf66;"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="messagesTab" class="tab-content">
+      <div class="card">
+        <h2>
+          <span class="status-indicator status-success"></span>
+          Message History
+        </h2>
+
+        <div id="messageHistory" style="max-height: 400px; overflow-y: auto; padding: 20px; background: #f8f9fa; border-radius: 12px;">
+          <p style="text-align: center; color: #666;">Loading messages...</p>
+        </div>
+
+        <div style="margin-top: 20px;">
+          <button id="clearHistoryBtn" class="btn btn-danger">
+            🗑️ Clear History
+          </button>
+          <button id="exportHistoryBtn" class="btn">
+            📤 Export History
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="notification" class="notification"></div>
+
+<script>
+// Enhanced utility functions
+class CryptoUtils {
+  static async generateRSAKeyPair() {
+    return await window.crypto.subtle.generateKey(
+      {
+        name: "RSA-OAEP",
+        modulusLength: 2048,
+        publicExponent: new Uint8Array([1, 0, 1]),
+        hash: "SHA-256",
+      },
+      true,
+      ["encrypt", "decrypt"]
+    );
+  }
+
+  static async exportPublicKey(key) {
+    const spki = await window.crypto.subtle.exportKey("spki", key);
+    return this.arrayBufferToBase64(spki);
+  }
+
+  static async exportPrivateKey(key) {
+    const pk = await window.crypto.subtle.exportKey("pkcs8", key);
+    return this.arrayBufferToBase64(pk);
+  }
+
+  static async importPublicKey(spkiBase64) {
+    const spki = this.base64ToArrayBuffer(spkiBase64);
+    return await window.crypto.subtle.importKey(
+      "spki",
+      spki,
+      { name: "RSA-OAEP", hash: "SHA-256" },
+      true,
+      ["encrypt"]
+    );
+  }
+
+  static async importPrivateKey(pkBase64) {
+    const pk = this.base64ToArrayBuffer(pkBase64);
+    return await window.crypto.subtle.importKey(
+      "pkcs8",
+      pk,
+      { name: "RSA-OAEP", hash: "SHA-256" },
+      true,
+      ["decrypt"]
+    );
+  }
+
+  static async generateAESKey() {
+    return await window.crypto.subtle.generateKey(
+      { name: "AES-GCM", length: 256 },
+      true,
+      ["encrypt", "decrypt"]
+    );
+  }
+
+  static async encryptAES(aesKey, data) {
+    const iv = window.crypto.getRandomValues(new Uint8Array(12));
+    const encrypted = await window.crypto.subtle.encrypt(
+      { name: "AES-GCM", iv: iv },
+      aesKey,
+      data
+    );
+    return { encrypted, iv };
+  }
+
+  static async decryptAES(aesKey, encrypted, iv) {
+    return await window.crypto.subtle.decrypt(
+      { name: "AES-GCM", iv: iv },
+      aesKey,
+      encrypted
+    );
+  }
+
+  static arrayBufferToBase64(buffer) {
+    const bytes = new Uint8Array(buffer);
+    let binary = '';
+    for (let b of bytes) binary += String.fromCharCode(b);
+    return btoa(binary);
+  }
+
+  static base64ToArrayBuffer(base64) {
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes.buffer;
+  }
+}
+
+// UI Management Class
+class UIManager {
+  static showNotification(message, type = 'info') {
+    const notification = document.getElementById('notification');
+    notification.textContent = message;
+    notification.className = `notification ${type}`;
+    notification.classList.add('show');
+
+    setTimeout(() => {
+      notification.classList.remove('show');
+    }, 3000);
+  }
+
+  static updateProgress(elementId, percentage) {
+    const progressBar = document.getElementById(elementId);
+    const fill = progressBar.querySelector('.progress-fill');
+    fill.style.width = percentage + '%';
+
+    if (percentage === 100) {
+      setTimeout(() => {
+        progressBar.classList.add('hidden');
+      }, 500);
+    } else {
+      progressBar.classList.remove('hidden');
+    }
+  }
+
+  static async simulateProgress(elementId, duration = 2000) {
+    return new Promise(resolve => {
+      let progress = 0;
+      const increment = 100 / (duration / 50);
+
+      const interval = setInterval(() => {
+        progress += increment;
+        this.updateProgress(elementId, Math.min(progress, 100));
+
+        if (progress >= 100) {
+          clearInterval(interval);
+          resolve();
+        }
+      }, 50);
+    });
+  }
+
+  static addMessageToHistory(type, content, timestamp = new Date()) {
+    const history = document.getElementById('messageHistory');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message-bubble ${type === 'received' ? 'received' : ''}`;
+
+    const timeStr = timestamp.toLocaleTimeString();
+    messageDiv.innerHTML = `
+      <div style="font-size: 12px; opacity: 0.7; margin-bottom: 5px;">
+        ${type === 'sent' ? '📤 Encrypted' : '📥 Decrypted'} at ${timeStr}
+      </div>
+      <div>${content.substring(0, 100)}${content.length > 100 ? '...' : ''}</div>
+    `;
+
+    if (history.children.length === 1 && history.children[0].tagName === 'P' && history.children[0].textContent === 'Loading messages...') {
+      history.innerHTML = ''; // Clear initial loading message
+    } else if (history.children.length === 1 && history.children[0].tagName === 'P' && history.children[0].textContent.includes('No messages yet')) {
+        history.innerHTML = ''; // Clear "No messages yet" placeholder
+    }
+
+    history.appendChild(messageDiv);
+    history.scrollTop = history.scrollHeight;
+  }
+
+  static loadMessagesIntoUI(messages) {
+    const history = document.getElementById('messageHistory');
+    history.innerHTML = ''; // Clear existing
+    if (messages.length === 0) {
+      history.innerHTML = '<p style="text-align: center; color: #666;">No messages yet. Start encrypting and decrypting messages!</p>';
+    } else {
+      messages.forEach(msg => {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message-bubble ${msg.type === 'received' ? 'received' : ''}`;
+        const timeStr = new Date(msg.timestamp).toLocaleTimeString(); // Convert stored string to Date
+        messageDiv.innerHTML = `
+          <div style="font-size: 12px; opacity: 0.7; margin-bottom: 5px;">
+            ${msg.type === 'sent' ? '📤 Encrypted' : '📥 Decrypted'} at ${timeStr}
+          </div>
+          <div>${msg.content.substring(0, 100)}${msg.content.length > 100 ? '...' : ''}</div>
+        `;
+        history.appendChild(messageDiv);
+      });
+      history.scrollTop = history.scrollHeight;
+    }
+  }
+
+  static downloadFile(content, filename, type = 'text/plain') {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  static copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+      this.showNotification('📋 Copied to clipboard!', 'success');
+    }).catch(() => {
+      this.showNotification('❌ Failed to copy to clipboard', 'error');
+    });
+  }
+}
+
+// IndexedDB Manager
+class DBManager {
+  constructor() {
+    this.db = null;
+    this.dbName = 'SecureChatDB';
+    this.dbVersion = 1;
+    this.keyStoreName = 'keys';
+    this.messageStoreName = 'messages';
+    this.storageQuota = 1 * 1024 * 1024 * 1024; // 1 GB in bytes
+  }
+
+  async openDB() {
+    return new Promise((resolve, reject) => {
+      if (this.db) {
+        resolve(this.db);
+        return;
+      }
+
+      const request = indexedDB.open(this.dbName, this.dbVersion);
+
+      request.onupgradeneeded = (event) => {
+        const db = event.target.result;
+        if (!db.objectStoreNames.contains(this.keyStoreName)) {
+          db.createObjectStore(this.keyStoreName, { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains(this.messageStoreName)) {
+          db.createObjectStore(this.messageStoreName, { autoIncrement: true });
+        }
+      };
+
+      request.onsuccess = (event) => {
+        this.db = event.target.result;
+        console.log("IndexedDB opened successfully.");
+        this.requestPersistentStorage();
+        resolve(this.db);
+      };
+
+      request.onerror = (event) => {
+        console.error("IndexedDB error:", event.target.error);
+        UIManager.showNotification(`IndexedDB error: ${event.target.error.message}`, 'error');
+        reject(event.target.error);
+      };
+    });
+  }
+
+  async requestPersistentStorage() {
+      if (navigator.storage && navigator.storage.persist) {
+          const isPersisted = await navigator.storage.persisted();
+          if (isPersisted) {
+              console.log("Storage is already persistent.");
+              return;
+          }
+          const result = await navigator.storage.persist();
+          if (result) {
+              console.log("Persistent storage granted.");
+          } else {
+              console.warn("Persistent storage not granted.");
+              UIManager.showNotification("Persistent storage not granted. Data might be cleared by browser.", 'warning');
+          }
+      } else {
+          console.warn("StorageManager API not supported for persistence.");
+      }
+
+      if (navigator.storage && navigator.storage.estimate) {
+          const quota = await navigator.storage.estimate();
+          const currentUsage = quota.usage; // in bytes
+          const availableQuota = quota.quota; // in bytes
+          console.log(`Usage: ${currentUsage / (1024 * 1024)} MB, Quota: ${availableQuota / (1024 * 1024)} MB`);
+
+          // Request 1GB of storage if available and needed
+          if (availableQuota < this.storageQuota && currentUsage + (10 * 1024 * 1024) < this.storageQuota) { // Check if we are far from 1GB but user has less
+              if (navigator.storage.requestQuota) { // Deprecated, but good for older browser compatibility
+                  try {
+                      const grantedQuota = await navigator.storage.requestQuota(this.storageQuota);
+                      console.log(`Quota granted (deprecated): ${grantedQuota / (1024 * 1024)} MB`);
+                  } catch (e) {
+                      console.error("requestQuota failed:", e);
+                  }
+              } else {
+                  console.info("To get 1GB, browser might need user permission or automatic granting.");
+              }
+          }
+      } else {
+          console.warn("StorageManager API not supported for quota estimation.");
+      }
+  }
+
+
+  async putKey(id, keyData) {
+    const db = await this.openDB();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([this.keyStoreName], 'readwrite');
+      const store = transaction.objectStore(this.keyStoreName);
+      const request = store.put({ id: id, key: keyData });
+
+      request.onsuccess = () => resolve();
+      request.onerror = (event) => {
+        console.error(`Error saving key ${id}:`, event.target.error);
+        UIManager.showNotification(`Error saving key: ${event.target.error.message}`, 'error');
+        reject(event.target.error);
+      };
+    });
+  }
+
+  async getKey(id) {
+    const db = await this.openDB();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([this.keyStoreName], 'readonly');
+      const store = transaction.objectStore(this.keyStoreName);
+      const request = store.get(id);
+
+      request.onsuccess = () => resolve(request.result ? request.result.key : null);
+      request.onerror = (event) => {
+        console.error(`Error getting key ${id}:`, event.target.error);
+        reject(event.target.error);
+      };
+    });
+  }
+
+  async addMessage(message) {
+    const db = await this.openDB();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([this.messageStoreName], 'readwrite');
+      const store = transaction.objectStore(this.messageStoreName);
+      const request = store.add(message); // message object {type, content, timestamp}
+
+      request.onsuccess = () => resolve();
+      request.onerror = (event) => {
+        console.error("Error adding message:", event.target.error);
+        UIManager.showNotification(`Error saving message: ${event.target.error.message}`, 'error');
+        reject(event.target.error);
+      };
+    });
+  }
+
+  async getAllMessages() {
+    const db = await this.openDB();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([this.messageStoreName], 'readonly');
+      const store = transaction.objectStore(this.messageStoreName);
+      const request = store.getAll();
+
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = (event) => {
+        console.error("Error getting all messages:", event.target.error);
+        reject(event.target.error);
+      };
+    });
+  }
+
+  async clearMessages() {
+    const db = await this.openDB();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([this.messageStoreName], 'readwrite');
+      const store = transaction.objectStore(this.messageStoreName);
+      const request = store.clear();
+
+      request.onsuccess = () => resolve();
+      request.onerror = (event) => {
+        console.error("Error clearing messages:", event.target.error);
+        UIManager.showNotification(`Error clearing messages: ${event.target.error.message}`, 'error');
+        reject(event.target.error);
+      };
+    });
+  }
+}
+
+const dbManager = new DBManager(); // Instantiate the DB manager
+
+// Application State
+class AppState {
+  constructor() {
+    this.userKeyPair = null;
+    this.messages = [];
+  }
+
+  setKeyPair(keyPair) {
+    this.userKeyPair = keyPair;
+  }
+
+  async loadInitialData() {
+    try {
+      const privateKeyPem = await dbManager.getKey('privateKey');
+      if (privateKeyPem) {
+        this.userKeyPair = { privateKey: await CryptoUtils.importPrivateKey(privateKeyPem) };
+        document.getElementById('privateKeyDisplay').value = privateKeyPem;
+        UIManager.showNotification('✅ Private key loaded from local storage!', 'success');
+        document.getElementById('downloadPrivateBtn').disabled = false;
+        document.getElementById('savePrivateBtn').disabled = true; // Already loaded
+      } else {
+          document.getElementById('savePrivateBtn').disabled = true; // Disable until a key is generated/imported
+      }
+
+      this.messages = await dbManager.getAllMessages();
+      UIManager.loadMessagesIntoUI(this.messages);
+      UIManager.showNotification('💬 Messages loaded from local storage!', 'success');
+    } catch (error) {
+      console.error("Error loading initial data:", error);
+      UIManager.showNotification('❌ Failed to load data from local storage.', 'error');
+      document.getElementById('messageHistory').innerHTML = '<p style="text-align: center; color: #666;">Error loading messages.</p>';
+    }
+  }
+
+  async addMessage(type, content) {
+    const message = { type, content, timestamp: new Date().toISOString() }; // Store ISO string for date
+    this.messages.push(message);
+    UIManager.addMessageToHistory(type, content);
+    try {
+      await dbManager.addMessage(message);
+    } catch (error) {
+      console.error("Failed to save message to DB:", error);
+    }
+  }
+
+  async clearMessages() {
+    this.messages = [];
+    UIManager.showNotification('🗑️ Message history cleared.', 'info');
+    document.getElementById('messageHistory').innerHTML =
+      '<p style="text-align: center; color: #666;">No messages yet. Start encrypting and decrypting messages!</p>';
+    try {
+      await dbManager.clearMessages();
+    } catch (error) {
+      console.error("Failed to clear messages from DB:", error);
+    }
+  }
+
+  exportMessages() {
+    const data = JSON.stringify(this.messages, null, 2);
+    UIManager.downloadFile(data, 'secure-messages.json', 'application/json');
+  }
+}
+
+const appState = new AppState();
+
+// Event Handlers
+function initializeEventHandlers() {
+  // Login handler
+  document.getElementById('loginBtn').onclick = async () => {
+    const password = document.getElementById('passwordInput').value;
+    if (password === 'jaydip@123') {
+      document.getElementById('loginSection').classList.add('hidden');
+      document.getElementById('appSection').classList.remove('hidden');
+      UIManager.showNotification('🎉 Welcome to SecureChat Pro!', 'success');
+      await appState.loadInitialData(); // Load data after successful login
+    } else {
+      UIManager.showNotification('❌ Invalid password. Try again.', 'error');
+    }
+  };
+
+  // Tab navigation
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.onclick = () => {
+      const tabName = tab.dataset.tab;
+
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.getElementById(`${tabName}Tab`).classList.add('active');
+    };
+  });
+
+  // Key Generation
+  document.getElementById('generateKeysBtn').onclick = async () => {
+    UIManager.showNotification('⏳ Generating RSA key pair...', 'info');
+    document.getElementById('generateKeysBtn').disabled = true;
+    try {
+      await UIManager.simulateProgress('encryptProgress', 3000);
+      const keyPair = await CryptoUtils.generateRSAKeyPair();
+      appState.setKeyPair(keyPair);
+
+      const publicKey = await CryptoUtils.exportPublicKey(keyPair.publicKey);
+      const privateKey = await CryptoUtils.exportPrivateKey(keyPair.privateKey);
+
+      document.getElementById('publicKeyDisplay').value = publicKey;
+      document.getElementById('privateKeyDisplay').value = privateKey;
+      document.getElementById('copyPublicBtn').disabled = false;
+      document.getElementById('downloadPrivateBtn').disabled = false;
+      document.getElementById('savePrivateBtn').disabled = false; // Enable save button after generation
+      UIManager.showNotification('✅ Key pair generated successfully!', 'success');
+    } catch (error) {
+      console.error("Error generating keys:", error);
+      UIManager.showNotification('❌ Failed to generate keys.', 'error');
+    } finally {
+      document.getElementById('generateKeysBtn').disabled = false;
+    }
+  };
+
+  // Save Private Key to DB
+  document.getElementById('savePrivateBtn').onclick = async () => {
+    const privateKeyText = document.getElementById('privateKeyDisplay').value;
+    if (privateKeyText) {
+      try {
+        await dbManager.putKey('privateKey', privateKeyText);
+        UIManager.showNotification('✅ Private key saved to local storage!', 'success');
+        document.getElementById('savePrivateBtn').disabled = true; // Disable after saving
+      } catch (error) {
+        console.error("Error saving private key to DB:", error);
+        UIManager.showNotification('❌ Failed to save private key to local storage.', 'error');
+      }
+    } else {
+      UIManager.showNotification('No private key to save. Generate or import one first.', 'warning');
+    }
+  };
+
+
+  // Copy Public Key
+  document.getElementById('copyPublicBtn').onclick = () => {
+    const publicKey = document.getElementById('publicKeyDisplay').value;
+    if (publicKey) {
+      UIManager.copyToClipboard(publicKey);
+    } else {
+      UIManager.showNotification('No public key to copy.', 'info');
+    }
+  };
+
+  // Download Private Key
+  document.getElementById('downloadPrivateBtn').onclick = () => {
+    const privateKey = document.getElementById('privateKeyDisplay').value;
+    if (privateKey) {
+      UIManager.downloadFile(privateKey, 'private_key.pem', 'application/x-pem-file');
+      UIManager.showNotification('💾 Private key downloaded!', 'success');
+    } else {
+      UIManager.showNotification('No private key to download.', 'info');
+    }
+  };
+
+  // Import Private Key (File Input)
+  document.getElementById('keyFileInput').onchange = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const privateKeyContent = e.target.result;
+        try {
+          const importedKey = await CryptoUtils.importPrivateKey(privateKeyContent);
+          appState.setKeyPair({ privateKey: importedKey });
+          document.getElementById('privateKeyDisplay').value = privateKeyContent;
+          UIManager.showNotification('✅ Private key imported successfully!', 'success');
+          document.getElementById('downloadPrivateBtn').disabled = false;
+          document.getElementById('savePrivateBtn').disabled = false; // Enable save after import
+        } catch (error) {
+          console.error("Error importing private key:", error);
+          UIManager.showNotification('❌ Failed to import private key. Invalid format?', 'error');
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  // File drop zone for key import
+  const keyDropZone = document.getElementById('keyDropZone');
+  keyDropZone.ondragover = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    keyDropZone.style.backgroundColor = 'rgba(102, 126, 234, 0.2)';
+  };
+  keyDropZone.ondragleave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    keyDropZone.style.backgroundColor = '';
+  };
+  keyDropZone.ondrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    keyDropZone.style.backgroundColor = '';
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      document.getElementById('keyFileInput').files = files;
+      document.getElementById('keyFileInput').dispatchEvent(new Event('change'));
+    }
+  };
+  keyDropZone.onclick = () => {
+    document.getElementById('keyFileInput').click();
+  };
+
+  // Character count for plain text
+  document.getElementById('plainText').oninput = (e) => {
+    document.getElementById('charCount').textContent = e.target.value.length;
+    document.getElementById('encryptBtn').disabled = e.target.value.length === 0 || !document.getElementById('recipientPublicKey').value;
+  };
+
+  // Enable encrypt button when recipient public key and plain text are present
+  document.getElementById('recipientPublicKey').oninput = (e) => {
+    document.getElementById('encryptBtn').disabled = e.target.value.length === 0 || document.getElementById('plainText').value.length === 0;
+  };
+
+
+  // Encryption
+  document.getElementById('encryptBtn').onclick = async () => {
+    const recipientPublicKeyText = document.getElementById('recipientPublicKey').value;
+    const plainText = document.getElementById('plainText').value;
+
+    if (!recipientPublicKeyText || !plainText) {
+      UIManager.showNotification('Please provide recipient public key and message.', 'warning');
+      return;
+    }
+
+    if (!appState.userKeyPair || !appState.userKeyPair.privateKey) {
+        UIManager.showNotification('Please generate or import your own key pair first.', 'warning');
+        return;
+    }
+
+    UIManager.showNotification('⏳ Encrypting message...', 'info');
+    document.getElementById('encryptBtn').disabled = true;
+    document.getElementById('encryptionResults').classList.add('hidden');
+
+    try {
+      await UIManager.simulateProgress('encryptProgress');
+
+      const recipientPublicKey = await CryptoUtils.importPublicKey(recipientPublicKeyText);
+      const aesKey = await CryptoUtils.generateAESKey();
+      const exportedAesKey = await window.crypto.subtle.exportKey('raw', aesKey);
+
+      const encryptedAESKey = await window.crypto.subtle.encrypt(
+        { name: "RSA-OAEP" },
+        recipientPublicKey,
+        exportedAesKey
+      );
+
+      const encodedPlainText = new TextEncoder().encode(plainText);
+      const { encrypted, iv } = await CryptoUtils.encryptAES(aesKey, encodedPlainText);
+
+      document.getElementById('encryptedMessage').value = CryptoUtils.arrayBufferToBase64(encrypted);
+      document.getElementById('encryptedAESKey').value = CryptoUtils.arrayBufferToBase64(encryptedAESKey);
+      document.getElementById('iv').value = CryptoUtils.arrayBufferToBase64(iv);
+
+      document.getElementById('encryptionResults').classList.remove('hidden');
+      UIManager.showNotification('✅ Message encrypted successfully!', 'success');
+      await appState.addMessage('sent', plainText); // Save to IndexedDB
+
+    } catch (error) {
+      console.error("Encryption error:", error);
+      UIManager.showNotification('❌ Failed to encrypt message. Check keys and message size.', 'error');
+    } finally {
+      document.getElementById('encryptBtn').disabled = false;
+    }
+  };
+
+  // Copy All Encrypted Data
+  document.getElementById('copyEncryptedBtn').onclick = () => {
+    const encryptedMessage = document.getElementById('encryptedMessage').value;
+    const encryptedAESKey = document.getElementById('encryptedAESKey').value;
+    const iv = document.getElementById('iv').value;
+    const allData = `Encrypted Message:\n${encryptedMessage}\n\nEncrypted AES Key:\n${encryptedAESKey}\n\nIV:\n${iv}`;
+    if (encryptedMessage && encryptedAESKey && iv) {
+      UIManager.copyToClipboard(allData);
+    } else {
+      UIManager.showNotification('No encrypted data to copy.', 'info');
+    }
+  };
+
+  // Enable decrypt button based on input fields
+  const decryptInputs = ['yourPrivateKey', 'encMessageForDecryption', 'encAESKeyForDecryption', 'ivForDecryption'];
+  decryptInputs.forEach(id => {
+    document.getElementById(id).oninput = () => {
+      const allFilled = decryptInputs.every(inputId => document.getElementById(inputId).value.length > 0);
+      document.getElementById('decryptBtn').disabled = !allFilled;
+    };
+  });
+
+  // Decryption
+  document.getElementById('decryptBtn').onclick = async () => {
+    let yourPrivateKeyText = document.getElementById('yourPrivateKey').value;
+    const encryptedMessageText = document.getElementById('encMessageForDecryption').value;
+    const encryptedAESKeyText = document.getElementById('encAESKeyForDecryption').value;
+    const ivText = document.getElementById('ivForDecryption').value;
+
+    // Attempt to load private key from appState if not provided in textbox
+    if (!yourPrivateKeyText && appState.userKeyPair && appState.userKeyPair.privateKey) {
+        yourPrivateKeyText = await CryptoUtils.exportPrivateKey(appState.userKeyPair.privateKey);
+        document.getElementById('yourPrivateKey').value = yourPrivateKeyText; // Populate the textbox
+    }
+
+    if (!yourPrivateKeyText || !encryptedMessageText || !encryptedAESKeyText || !ivText) {
+      UIManager.showNotification('Please fill all decryption fields, or generate/import your private key.', 'warning');
+      return;
+    }
+
+    UIManager.showNotification('⏳ Decrypting message...', 'info');
+    document.getElementById('decryptBtn').disabled = true;
+    document.getElementById('decryptionResults').classList.add('hidden');
+
+    try {
+      await UIManager.simulateProgress('decryptProgress');
+
+      const privateKey = await CryptoUtils.importPrivateKey(yourPrivateKeyText);
+      const encryptedAESKey = CryptoUtils.base64ToArrayBuffer(encryptedAESKeyText);
+      const encryptedMessage = CryptoUtils.base64ToArrayBuffer(encryptedMessageText);
+      const iv = CryptoUtils.base64ToArrayBuffer(ivText);
+
+      const decryptedAESKey = await window.crypto.subtle.decrypt(
+        { name: "RSA-OAEP" },
+        privateKey,
+        encryptedAESKey
+      );
+
+      const aesKey = await window.crypto.subtle.importKey(
+        'raw',
+        decryptedAESKey,
+        { name: "AES-GCM" },
+        true,
+        ["decrypt"]
+      );
+
+      const decryptedBytes = await CryptoUtils.decryptAES(aesKey, encryptedMessage, iv);
+      const decryptedMessage = new TextDecoder().decode(decryptedBytes);
+
+      document.getElementById('decryptedMessage').value = decryptedMessage;
+      document.getElementById('decryptionResults').classList.remove('hidden');
+      UIManager.showNotification('✅ Message decrypted successfully!', 'success');
+      await appState.addMessage('received', decryptedMessage); // Save to IndexedDB
+
+    } catch (error) {
+      console.error("Decryption error:", error);
+      UIManager.showNotification('❌ Failed to decrypt message. Check your private key or encrypted data.', 'error');
+    } finally {
+      document.getElementById('decryptBtn').disabled = false;
+    }
+  };
+
+  // Clear Message History
+  document.getElementById('clearHistoryBtn').onclick = async () => {
+    await appState.clearMessages(); // Clear from IndexedDB and UI
+  };
+
+  // Export Message History
+  document.getElementById('exportHistoryBtn').onclick = () => {
+    if (appState.messages.length > 0) {
+      appState.exportMessages();
+      UIManager.showNotification('📤 Message history exported.', 'success');
+    } else {
+      UIManager.showNotification('No message history to export.', 'info');
+    }
+  };
+}
+
+// Initialize all event handlers when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+    initializeEventHandlers();
+    // No need to load data here, it will be loaded after successful login
+});
+</script>
+</body>
+</html>
